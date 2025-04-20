@@ -3,13 +3,32 @@ import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { toast } from "@/components/ui/sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
+  const [isSubscribing, setIsSubscribing] = useState(false);
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Email subscription will be implemented after Supabase integration
+    setIsSubscribing(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('subscribe-newsletter', {
+        body: { email }
+      });
+
+      if (error) throw error;
+
+      toast.success("Thank you for subscribing to our newsletter!");
+      setEmail("");
+    } catch (error) {
+      console.error('Error subscribing to newsletter:', error);
+      toast.error("Failed to subscribe. Please try again later.");
+    } finally {
+      setIsSubscribing(false);
+    }
   };
 
   return (
@@ -90,9 +109,11 @@ const Footer = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-muted"
+                required
               />
-              <Button type="submit" className="w-full">
-                <Mail className="mr-2 h-4 w-4" /> Subscribe
+              <Button type="submit" disabled={isSubscribing}>
+                <Mail className="mr-2 h-4 w-4" />
+                {isSubscribing ? "Subscribing..." : "Subscribe"}
               </Button>
             </form>
           </div>
