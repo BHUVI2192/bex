@@ -23,6 +23,12 @@ serve(async (req) => {
 
   try {
     const { name, email, message }: ContactRequest = await req.json()
+    
+    if (!name || !email || !message) {
+      throw new Error("Name, email, and message are required")
+    }
+
+    console.log("Sending contact form email from:", email)
 
     const { data, error } = await resend.emails.send({
       from: 'BharatEsports Express <onboarding@resend.dev>',
@@ -39,8 +45,11 @@ serve(async (req) => {
     })
 
     if (error) {
+      console.error("Resend API error:", error)
       throw error
     }
+
+    console.log("Contact email sent successfully:", data)
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -48,7 +57,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error sending email:', error)
     return new Response(
-      JSON.stringify({ error: 'Failed to send email' }),
+      JSON.stringify({ error: error.message || 'Failed to send email' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

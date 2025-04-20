@@ -10,12 +10,19 @@ const corsHeaders = {
 }
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
     const { email } = await req.json()
+    
+    if (!email) {
+      throw new Error("Email is required")
+    }
+
+    console.log("Sending confirmation email to:", email)
 
     // Send confirmation email to subscriber
     const { data, error } = await resend.emails.send({
@@ -30,8 +37,11 @@ serve(async (req) => {
     })
 
     if (error) {
+      console.error("Resend API error:", error)
       throw error
     }
+
+    console.log("Email sent successfully:", data)
 
     return new Response(JSON.stringify({ success: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -39,7 +49,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error sending confirmation:', error)
     return new Response(
-      JSON.stringify({ error: 'Failed to process subscription' }),
+      JSON.stringify({ error: error.message || 'Failed to process subscription' }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

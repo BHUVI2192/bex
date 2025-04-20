@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
@@ -34,7 +35,7 @@ const Footer = () => {
   return (
     <footer className="bg-esports-darker border-t border-muted py-12">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">
               <span className="text-esports-purple">Bharat</span>Esports
@@ -59,11 +60,6 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
-                <Link to="/categories" className="text-muted-foreground hover:text-esports-purple transition-colors">
-                  Categories
-                </Link>
-              </li>
-              <li>
                 <Link to="/accessories" className="text-muted-foreground hover:text-esports-purple transition-colors">
                   Accessories
                 </Link>
@@ -71,27 +67,6 @@ const Footer = () => {
               <li>
                 <Link to="/contact" className="text-muted-foreground hover:text-esports-purple transition-colors">
                   Contact
-                </Link>
-              </li>
-            </ul>
-          </div>
-          
-          <div>
-            <h4 className="font-bold mb-4">Categories</h4>
-            <ul className="space-y-2">
-              <li>
-                <Link to="/categories/fps" className="text-muted-foreground hover:text-esports-purple transition-colors">
-                  FPS
-                </Link>
-              </li>
-              <li>
-                <Link to="/categories/moba" className="text-muted-foreground hover:text-esports-purple transition-colors">
-                  MOBA
-                </Link>
-              </li>
-              <li>
-                <Link to="/categories/battle-royale" className="text-muted-foreground hover:text-esports-purple transition-colors">
-                  Battle Royale
                 </Link>
               </li>
             </ul>
