@@ -1,37 +1,51 @@
 
 import React from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Headphones, ShoppingCart } from "lucide-react";
+import { ArrowRight, ShoppingCart } from "lucide-react";
 import { Card } from "@/components/ui/card";
-
-// This is temporary mock data - will be replaced with backend data later
-const accessories = [
-  {
-    id: 1,
-    name: "Razer BlackShark V2 Pro",
-    description: "Wireless Gaming Headset with THX Spatial Audio",
-    image: "https://picsum.photos/400/300",
-    price: "₹15,999",
-    link: "https://www.amazon.in/Razer-BlackShark-Wireless-Gaming-Headset/dp/B08FQG96RP"
-  },
-  {
-    id: 2,
-    name: "Logitech G502 HERO",
-    description: "High Performance Gaming Mouse",
-    image: "https://picsum.photos/400/300",
-    price: "₹4,995",
-    link: "https://www.flipkart.com/logitech-g502-hero-wired-optical-gaming-mouse/p/itm92df1465cbd80"
-  }
-];
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const AccessoriesPage = () => {
+  const { data: accessories, isLoading } = useQuery({
+    queryKey: ['accessories'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('accessories')
+        .select('*')
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    }
+  });
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Gaming Accessories</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="overflow-hidden bg-card hover:shadow-lg transition-shadow animate-pulse">
+              <div className="h-48 bg-gray-200" />
+              <div className="p-4">
+                <div className="h-6 bg-gray-200 rounded w-3/4 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-1/2" />
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Gaming Accessories</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {accessories.map((item) => (
+        {accessories?.map((item) => (
           <Card key={item.id} className="overflow-hidden bg-card hover:shadow-lg transition-shadow">
-            <img src={item.image} alt={item.name} className="w-full h-48 object-cover" />
+            <img src={item.image_url} alt={item.name} className="w-full h-48 object-cover" />
             <div className="p-4">
               <div className="flex items-start justify-between">
                 <div>
