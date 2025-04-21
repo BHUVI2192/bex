@@ -33,8 +33,25 @@ serve(async (req) => {
         <h2>Thank you for subscribing!</h2>
         <p>You're now subscribed to receive the latest gaming news from BharatEsports Express.</p>
         <p>Stay tuned for exciting updates!</p>
+        <p>Follow us on social media:</p>
+        <p>
+          <a href="https://instagram.com/bharatesports.bgmi">Instagram</a><br>
+          <a href="https://youtube.com/@BharatEsports">YouTube</a>
+        </p>
       `
     })
+
+    // Send notification to admin
+    await resend.emails.send({
+      from: 'BharatEsports Express <onboarding@resend.dev>',
+      to: ['bharatesports.bgmi@gmail.com'],
+      subject: 'New Newsletter Subscription',
+      html: `
+        <h2>New Newsletter Subscription</h2>
+        <p>A new user has subscribed to your newsletter:</p>
+        <p><strong>Email:</strong> ${email}</p>
+      `
+    });
 
     if (error) {
       console.error("Resend API error:", error)

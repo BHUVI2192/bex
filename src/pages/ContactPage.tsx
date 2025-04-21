@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Mail, Send } from "lucide-react";
+import { Mail, Send, Instagram, Youtube } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 
 const ContactPage = () => {
@@ -110,6 +111,29 @@ const ContactPage = () => {
               </Button>
             </form>
           </CardContent>
+          <CardFooter className="flex flex-col items-center pt-6 pb-4">
+            <p className="text-sm text-muted-foreground mb-3">Follow us on social media</p>
+            <div className="flex space-x-6">
+              <a 
+                href="https://instagram.com/bharatesports.bgmi" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-esports-purple transition-colors"
+              >
+                <Instagram className="h-6 w-6" />
+                <span className="sr-only">Instagram</span>
+              </a>
+              <a 
+                href="https://youtube.com/@BharatEsports" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-muted-foreground hover:text-esports-purple transition-colors"
+              >
+                <Youtube className="h-6 w-6" />
+                <span className="sr-only">YouTube</span>
+              </a>
+            </div>
+          </CardFooter>
         </Card>
       </div>
     </div>

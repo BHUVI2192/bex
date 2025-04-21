@@ -30,6 +30,7 @@ serve(async (req) => {
 
     console.log("Sending contact form email from:", email)
 
+    // Send message to admin
     const { data, error } = await resend.emails.send({
       from: 'BharatEsports Express <onboarding@resend.dev>',
       to: ['bharatesports.bgmi@gmail.com'],
@@ -43,6 +44,23 @@ serve(async (req) => {
       `,
       reply_to: email
     })
+
+    // Send confirmation to user
+    await resend.emails.send({
+      from: 'BharatEsports Express <onboarding@resend.dev>',
+      to: [email],
+      subject: 'We received your message!',
+      html: `
+        <h2>Thank you for contacting us, ${name}!</h2>
+        <p>We have received your message and will get back to you as soon as possible.</p>
+        <p>Follow us on social media:</p>
+        <p>
+          <a href="https://instagram.com/bharatesports.bgmi">Instagram</a><br>
+          <a href="https://youtube.com/@BharatEsports">YouTube</a>
+        </p>
+        <p>Best regards,<br>The BharatEsports Express Team</p>
+      `
+    });
 
     if (error) {
       console.error("Resend API error:", error)
