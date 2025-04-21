@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail } from "lucide-react";
@@ -69,6 +68,7 @@ const Footer = () => {
                   Contact
                 </Link>
               </li>
+              {/* Categories link removed */}
             </ul>
           </div>
           

@@ -42,6 +42,45 @@ export type Database = {
         }
         Relationships: []
       }
+      drivers: {
+        Row: {
+          bio: string | null
+          created_at: string
+          experience: number
+          id: string
+          image: string
+          languages: string[]
+          name: string
+          phone: string | null
+          updated_at: string
+          verified: boolean
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          experience: number
+          id?: string
+          image: string
+          languages: string[]
+          name: string
+          phone?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          experience?: number
+          id?: string
+          image?: string
+          languages?: string[]
+          name?: string
+          phone?: string | null
+          updated_at?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           category: string
@@ -111,6 +150,45 @@ export type Database = {
           start_date?: string
           thumbnail_url?: string
           title?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          category: string
+          created_at: string
+          daily_rate: number | null
+          features: string[]
+          id: string
+          ideal_for: string
+          image: string
+          name: string
+          seats: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          daily_rate?: number | null
+          features: string[]
+          id?: string
+          ideal_for: string
+          image: string
+          name: string
+          seats: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          daily_rate?: number | null
+          features?: string[]
+          id?: string
+          ideal_for?: string
+          image?: string
+          name?: string
+          seats?: number
+          updated_at?: string
         }
         Relationships: []
       }
