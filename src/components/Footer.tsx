@@ -38,26 +38,26 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="text-xl font-bold mb-4">
-              <span className="text-esports-purple">Bharat</span>Esports
-              <span className="text-esports-purple">Express</span>
+              <span className="text-esports-blue">Bharat</span>Esports
+              <span className="text-esports-blue">Express</span>
             </h3>
             <p className="text-muted-foreground mb-4">
               Your ultimate source for Indian eSports news, tournaments, and gaming updates.
             </p>
             <div className="flex space-x-4 mb-4">
               <a 
-                href="https://instagram.com/bharatesports.bgmi" 
+                href="https://www.instagram.com/bharat_esp0rts?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-esports-purple transition-colors"
+                className="text-muted-foreground hover:text-esports-blue transition-colors"
               >
                 <Instagram className="h-6 w-6" />
               </a>
               <a 
-                href="https://youtube.com/@BharatEsports" 
+                href="https://youtube.com/@bharatesportsxpress?si=OTjdfwZYgGk4YAqt" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-esports-purple transition-colors"
+                className="text-muted-foreground hover:text-esports-blue transition-colors"
               >
                 <Youtube className="h-6 w-6" />
               </a>
@@ -68,26 +68,25 @@ const Footer = () => {
             <h4 className="font-bold mb-4">Quick Links</h4>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-esports-purple transition-colors">
+                <Link to="/" className="text-muted-foreground hover:text-esports-blue transition-colors">
                   Home
                 </Link>
               </li>
               <li>
-                <Link to="/news" className="text-muted-foreground hover:text-esports-purple transition-colors">
+                <Link to="/news" className="text-muted-foreground hover:text-esports-blue transition-colors">
                   News
                 </Link>
               </li>
               <li>
-                <Link to="/accessories" className="text-muted-foreground hover:text-esports-purple transition-colors">
+                <Link to="/accessories" className="text-muted-foreground hover:text-esports-blue transition-colors">
                   Accessories
                 </Link>
               </li>
               <li>
-                <Link to="/contact" className="text-muted-foreground hover:text-esports-purple transition-colors">
+                <Link to="/contact" className="text-muted-foreground hover:text-esports-blue transition-colors">
                   Contact
                 </Link>
               </li>
-              {/* Categories link removed */}
             </ul>
           </div>
           
@@ -117,18 +116,18 @@ const Footer = () => {
           <p className="mb-4">© 2025 BharatEsports Express. All rights reserved.</p>
           <div className="flex justify-center space-x-6">
             <a 
-              href="https://instagram.com/bharatesports.bgmi" 
+              href="https://www.instagram.com/bharat_esp0rts?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-esports-purple transition-colors"
+              className="text-muted-foreground hover:text-esports-blue transition-colors"
             >
               <Instagram className="h-5 w-5" />
             </a>
             <a 
-              href="https://youtube.com/@BharatEsports" 
+              href="https://youtube.com/@bharatesportsxpress?si=OTjdfwZYgGk4YAqt" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-esports-purple transition-colors"
+              className="text-muted-foreground hover:text-esports-blue transition-colors"
             >
               <Youtube className="h-5 w-5" />
             </a>
