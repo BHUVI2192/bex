@@ -84,6 +84,7 @@ const ContactPage = () => {
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-esports-blue transition-colors"
+                    aria-label="Instagram"
                   >
                     <Instagram className="h-6 w-6" />
                     <span className="sr-only">Instagram</span>
@@ -93,6 +94,7 @@ const ContactPage = () => {
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="text-muted-foreground hover:text-esports-blue transition-colors"
+                    aria-label="YouTube"
                   >
                     <Youtube className="h-6 w-6" />
                     <span className="sr-only">YouTube</span>

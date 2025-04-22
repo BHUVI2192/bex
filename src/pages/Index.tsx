@@ -131,6 +131,7 @@ const Index = () => {
         {/* 'Explore More' Button */}
         <div className="flex justify-center mt-8">
           <Link
+            // Now simply linking to /news, which loads at the top
             to="/news"
             className="btn-primary text-lg px-6 py-2 rounded font-medium flex items-center gap-2 !bg-esports-blue hover:bg-esports-blue/90 transition-colors"
           >

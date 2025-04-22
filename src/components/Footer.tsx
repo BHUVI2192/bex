@@ -45,11 +45,13 @@ const Footer = () => {
               Your ultimate source for Indian eSports news, tournaments, and gaming updates.
             </p>
             <div className="flex space-x-4 mb-4">
+              {/* Only show one set of social icons */}
               <a 
                 href="https://www.instagram.com/bharat_esp0rts?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-esports-blue transition-colors"
+                aria-label="Instagram"
               >
                 <Instagram className="h-6 w-6" />
               </a>
@@ -58,6 +60,7 @@ const Footer = () => {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-esports-blue transition-colors"
+                aria-label="YouTube"
               >
                 <Youtube className="h-6 w-6" />
               </a>
@@ -112,26 +115,9 @@ const Footer = () => {
           </div>
         </div>
         
+        {/* Remove duplicated set of icons here, show only copyright */}
         <div className="border-t border-muted mt-8 pt-8 text-center text-muted-foreground">
-          <p className="mb-4">© 2025 BharatEsports Express. All rights reserved.</p>
-          <div className="flex justify-center space-x-6">
-            <a 
-              href="https://www.instagram.com/bharat_esp0rts?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-esports-blue transition-colors"
-            >
-              <Instagram className="h-5 w-5" />
-            </a>
-            <a 
-              href="https://youtube.com/@bharatesportsxpress?si=OTjdfwZYgGk4YAqt" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-esports-blue transition-colors"
-            >
-              <Youtube className="h-5 w-5" />
-            </a>
-          </div>
+          <p className="mb-0">© 2025 BharatEsports Express. All rights reserved.</p>
         </div>
       </div>
     </footer>
