@@ -33,7 +33,7 @@ const HeroCarousel = ({ articles }: HeroCarouselProps) => {
   if (!articles.length) return null;
 
   return (
-    <div className="relative overflow-hidden rounded-xl h-[500px] glass-card">
+    <div className="relative overflow-hidden rounded-xl h-[500px] glass-card border border-esports-blue/30">
       <div 
         className="flex transition-transform duration-500 ease-out h-full"
         style={{ transform: `translateX(-${currentIndex * 100}%)` }}
@@ -48,22 +48,22 @@ const HeroCarousel = ({ articles }: HeroCarouselProps) => {
               alt={article.title} 
               className="absolute inset-0 w-full h-full object-cover"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col justify-end">
-              <div className="p-6 md:p-8">
+            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent flex flex-col justify-end">
+              <div className="p-6 md:p-10">
                 <div className="mb-4">
                   <span className="category-pill">{article.category}</span>
                 </div>
-                <h2 className="text-2xl md:text-4xl font-bold text-white mb-3">
+                <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">
                   {article.title}
                 </h2>
-                <p className="text-white/80 mb-4 max-w-3xl">
+                <p className="text-white/90 mb-6 max-w-3xl text-lg">
                   {article.excerpt}
                 </p>
                 <Link 
-                  to={`/article/${article.slug}`}
-                  className="btn-primary inline-block"
+                  to={`/${article.slug}`}
+                  className="bg-esports-blue hover:bg-esports-blue/90 text-white font-medium py-3 px-6 rounded-md transition-colors inline-block"
                 >
-                  Read Full Story
+                  Learn More
                 </Link>
               </div>
             </div>
@@ -91,13 +91,13 @@ const HeroCarousel = ({ articles }: HeroCarouselProps) => {
       </Button>
 
       {/* Indicators */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex space-x-2">
         {articles.map((_, index) => (
           <button
             key={index}
             className={`w-2 h-2 rounded-full transition-all ${
               index === currentIndex 
-                ? "bg-white w-6" 
+                ? "bg-esports-blue w-8" 
                 : "bg-white/50"
             }`}
             onClick={() => setCurrentIndex(index)}

@@ -7,33 +7,33 @@
 
 @layer base {
   :root {
-    --background: 236 20% 12%;
+    --background: 224 25% 10%;
     --foreground: 0 0% 98%;
 
-    --card: 240 17% 14%;
+    --card: 224 20% 13%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 17% 14%;
+    --popover: 224 20% 13%;
     --popover-foreground: 0 0% 98%;
 
-    --primary: 258 80% 75%;
+    --primary: 196 85% 50%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 240 13% 25%;
+    --secondary: 220 13% 25%;
     --secondary-foreground: 0 0% 98%;
 
-    --muted: 240 13% 20%;
-    --muted-foreground: 240 5% 65%;
+    --muted: 220 13% 20%;
+    --muted-foreground: 220 5% 65%;
 
-    --accent: 24 100% 53%;
+    --accent: 196 85% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 240 13% 25%;
-    --input: 240 13% 25%;
-    --ring: 258 80% 75%;
+    --border: 220 13% 25%;
+    --input: 220 13% 25%;
+    --ring: 196 85% 50%;
 
     --radius: 0.5rem;
   }
@@ -60,11 +60,11 @@
   }
   
   .neon-border {
-    @apply border border-esports-purple/70 shadow-[0_0_5px_1px_rgba(155,135,245,0.3)];
+    @apply border border-esports-blue/70 shadow-[0_0_5px_1px_rgba(30,174,219,0.3)];
   }
   
   .neon-highlight {
-    @apply text-esports-purple animate-pulse-glow;
+    @apply text-esports-blue animate-pulse-glow;
   }
   
   .news-card {
@@ -72,14 +72,29 @@
   }
   
   .category-pill {
-    @apply px-3 py-1 rounded-full text-xs font-medium bg-esports-purple/20 text-esports-purple;
+    @apply px-3 py-1 rounded-full text-xs font-medium bg-esports-blue/20 text-esports-blue;
   }
 
   .btn-primary {
-    @apply bg-esports-purple hover:bg-esports-purple/90 text-white font-medium py-2 px-4 rounded-md transition-colors;
+    @apply bg-esports-blue hover:bg-esports-blue/90 text-white font-medium py-2 px-4 rounded-md transition-colors;
   }
   
   .btn-secondary {
     @apply bg-muted hover:bg-muted/90 text-muted-foreground font-medium py-2 px-4 rounded-md transition-colors;
   }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { 
+    opacity: 1;
+    box-shadow: 0 0 5px rgb(30, 174, 219, 0.8), 0 0 10px rgb(30, 174, 219, 0.5); 
+  }
+  50% { 
+    opacity: 0.8;
+    box-shadow: 0 0 15px rgb(30, 174, 219, 0.8), 0 0 20px rgb(30, 174, 219, 0.5); 
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
 }
