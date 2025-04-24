@@ -1,16 +1,22 @@
 
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { articles } from "@/lib/data-service";
 import { toast } from "@/components/ui/sonner";
 import { Edit, Plus, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const AdminNewsPage = () => {
   const [newsArticles, setNewsArticles] = useState(articles);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingArticle, setEditingArticle] = useState(null);
+  const navigate = useNavigate();
 
   // Filter articles based on search term
   const filteredArticles = newsArticles.filter(
@@ -25,6 +31,32 @@ const AdminNewsPage = () => {
       setNewsArticles(newsArticles.filter(article => article.id !== id));
       toast.success("News article deleted successfully!");
     }
+  };
+
+  const handleEdit = (article) => {
+    setEditingArticle({...article});
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateArticle = () => {
+    if (!editingArticle) return;
+    
+    // In a real app, this would make an API call to update the article
+    const updatedArticles = newsArticles.map(article => 
+      article.id === editingArticle.id ? editingArticle : article
+    );
+    
+    setNewsArticles(updatedArticles);
+    setIsEditModalOpen(false);
+    toast.success("News article updated successfully!");
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditingArticle(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   return (
@@ -69,11 +101,13 @@ const AdminNewsPage = () => {
                 <TableCell>{article.date}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Link to={`/admin/news/edit/${article.id}`}>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEdit(article)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -89,6 +123,94 @@ const AdminNewsPage = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit News Article Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit News Article</DialogTitle>
+          </DialogHeader>
+          {editingArticle && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="title" className="text-right">
+                  Title
+                </Label>
+                <Input
+                  id="title"
+                  name="title"
+                  value={editingArticle.title}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="category" className="text-right">
+                  Category
+                </Label>
+                <Input
+                  id="category"
+                  name="category"
+                  value={editingArticle.category}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="imageUrl" className="text-right">
+                  Image URL
+                </Label>
+                <Input
+                  id="imageUrl"
+                  name="imageUrl"
+                  value={editingArticle.imageUrl}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="date" className="text-right">
+                  Date
+                </Label>
+                <Input
+                  id="date"
+                  name="date"
+                  value={editingArticle.date}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="excerpt" className="text-right">
+                  Excerpt
+                </Label>
+                <Textarea
+                  id="excerpt"
+                  name="excerpt"
+                  value={editingArticle.excerpt}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  rows={3}
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleUpdateArticle}
+              className="bg-esports-blue hover:bg-esports-blue/90"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

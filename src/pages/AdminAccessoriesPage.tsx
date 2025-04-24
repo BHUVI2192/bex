@@ -6,11 +6,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/sonner";
 import { Edit, Plus, Trash2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const AdminAccessoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingAccessory, setEditingAccessory] = useState(null);
+  const queryClient = useQueryClient();
 
   const { data: accessories, isLoading } = useQuery({
     queryKey: ['accessories'],
@@ -25,6 +31,53 @@ const AdminAccessoriesPage = () => {
     }
   });
 
+  // Delete mutation
+  const deleteMutation = useMutation({
+    mutationFn: async (id) => {
+      const { error } = await supabase
+        .from('accessories')
+        .delete()
+        .eq('id', id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accessories'] });
+      toast.success("Accessory deleted successfully!");
+    },
+    onError: (error) => {
+      console.error('Error deleting accessory:', error);
+      toast.error("Failed to delete accessory");
+    }
+  });
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async (accessory) => {
+      const { error } = await supabase
+        .from('accessories')
+        .update({
+          name: accessory.name,
+          description: accessory.description,
+          price: accessory.price,
+          link: accessory.link,
+          image_url: accessory.image_url
+        })
+        .eq('id', accessory.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accessories'] });
+      setIsEditModalOpen(false);
+      toast.success("Accessory updated successfully!");
+    },
+    onError: (error) => {
+      console.error('Error updating accessory:', error);
+      toast.error("Failed to update accessory");
+    }
+  });
+
   // Filter accessories based on search term
   const filteredAccessories = accessories?.filter(
     accessory => 
@@ -32,22 +85,28 @@ const AdminAccessoriesPage = () => {
       accessory.description.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id) => {
     if (confirm("Are you sure you want to delete this accessory?")) {
-      try {
-        const { error } = await supabase
-          .from('accessories')
-          .delete()
-          .eq('id', id);
-        
-        if (error) throw error;
-        
-        toast.success("Accessory deleted successfully!");
-      } catch (error) {
-        console.error('Error deleting accessory:', error);
-        toast.error("Failed to delete accessory");
-      }
+      deleteMutation.mutate(id);
     }
+  };
+
+  const handleEdit = (accessory) => {
+    setEditingAccessory({...accessory});
+    setIsEditModalOpen(true);
+  };
+
+  const handleUpdateAccessory = () => {
+    if (!editingAccessory) return;
+    updateMutation.mutate(editingAccessory);
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setEditingAccessory(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   if (isLoading) {
@@ -112,11 +171,13 @@ const AdminAccessoriesPage = () => {
                 <TableCell>{accessory.price}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
-                    <Link to={`/admin/accessories/edit/${accessory.id}`}>
-                      <Button variant="ghost" size="sm">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEdit(accessory)}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
@@ -132,6 +193,94 @@ const AdminAccessoriesPage = () => {
           </TableBody>
         </Table>
       </div>
+
+      {/* Edit Accessory Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Accessory</DialogTitle>
+          </DialogHeader>
+          {editingAccessory && (
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Name
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={editingAccessory.name}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="price" className="text-right">
+                  Price
+                </Label>
+                <Input
+                  id="price"
+                  name="price"
+                  value={editingAccessory.price}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="image_url" className="text-right">
+                  Image URL
+                </Label>
+                <Input
+                  id="image_url"
+                  name="image_url"
+                  value={editingAccessory.image_url}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Description
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  value={editingAccessory.description}
+                  onChange={handleChange}
+                  className="col-span-3"
+                  rows={3}
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="link" className="text-right">
+                  Link
+                </Label>
+                <Input
+                  id="link"
+                  name="link"
+                  value={editingAccessory.link}
+                  onChange={handleChange}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsEditModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleUpdateAccessory}
+              className="bg-esports-blue hover:bg-esports-blue/90"
+            >
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
