@@ -1,7 +1,7 @@
 
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu } from "lucide-react";
+import { Menu, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
@@ -28,6 +28,9 @@ const Navbar = () => {
             <Link to="/news" className="text-white hover:text-esports-blue transition-colors">News</Link>
             <Link to="/accessories" className="text-white hover:text-esports-blue transition-colors">Accessories</Link>
             <Link to="/contact" className="text-white hover:text-esports-blue transition-colors">Contact</Link>
+            <Link to="/admin" className="text-white hover:text-esports-blue transition-colors flex items-center">
+              <LogIn className="h-4 w-4 mr-1" /> Admin
+            </Link>
           </div>
 
           <div className="flex items-center gap-2">
@@ -49,6 +52,9 @@ const Navbar = () => {
               <Link to="/news" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>News</Link>
               <Link to="/accessories" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Accessories</Link>
               <Link to="/contact" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+              <Link to="/admin" className="text-white hover:text-esports-blue transition-colors py-2 flex items-center" onClick={() => setIsMenuOpen(false)}>
+                <LogIn className="h-4 w-4 mr-1" /> Admin
+              </Link>
             </div>
           </div>
         )}
