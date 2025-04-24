@@ -1,39 +1,26 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import HeroCarousel from "@/components/HeroCarousel";
-import { articles, shouldRefreshData, refreshNewsData } from "@/lib/data-service";
-import { toast } from "@/components/ui/use-toast";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Index = () => {
-  const [displayedArticles, setDisplayedArticles] = useState(articles);
-
-  // Auto-refresh news data every 30 minutes
-  useEffect(() => {
-    const checkForUpdates = async () => {
-      if (shouldRefreshData()) {
-        try {
-          const refreshedData = await refreshNewsData();
-          setDisplayedArticles(refreshedData);
-          toast({
-            title: "News Updated",
-            description: "The latest news has been loaded.",
-          });
-        } catch (error) {
-          console.error("Failed to refresh news data:", error);
-        }
-      }
-    };
-
-    // Check initially
-    checkForUpdates();
-
-    // Set up interval to check periodically
-    const interval = setInterval(checkForUpdates, 5 * 60 * 1000); // Check every 5 minutes
-
-    return () => clearInterval(interval);
-  }, []);
+  // Fetch news articles from Supabase
+  const { data: articles, isLoading } = useQuery({
+    queryKey: ['news'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('date', { ascending: false })
+        .limit(5);
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   // Custom slides for the carousel
   const customSlides = [
@@ -82,56 +69,59 @@ const Index = () => {
           </Link>
         </div>
 
-        <div className="flex flex-col gap-8">
-          {displayedArticles.slice(0, 5).map(article => (
-            <div
-              key={article.id}
-              className="group news-card flex flex-col md:flex-row gap-0 overflow-hidden border border-muted/70 rounded-lg shadow-md transition hover:shadow-lg hover:neon-border"
-            >
-              {/* Article Image: always on top for mobile, left for desktop */}
-              <div className="md:w-2/5 w-full h-48 md:h-40 flex-shrink-0 bg-muted">
-                <img
-                  src={article.imageUrl}
-                  alt={article.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400"
-                />
-              </div>
-              <div className="flex-1 p-5 flex flex-col justify-between bg-card/80">
-                <div>
-                  {/* Category and Date Row */}
-                  <div className="flex flex-wrap items-center gap-3 mb-2">
-                    <span className="category-pill">{article.category}</span>
-                    <span className="text-xs text-muted-foreground">{article.date}</span>
+        {isLoading ? (
+          <div className="text-center py-8">Loading latest news...</div>
+        ) : (
+          <div className="flex flex-col gap-8">
+            {articles.map(article => (
+              <div
+                key={article.id}
+                className="group news-card flex flex-col md:flex-row gap-0 overflow-hidden border border-muted/70 rounded-lg shadow-md transition hover:shadow-lg hover:neon-border"
+              >
+                {/* Article Image: always on top for mobile, left for desktop */}
+                <div className="md:w-2/5 w-full h-48 md:h-40 flex-shrink-0 bg-muted">
+                  <img
+                    src={article.imageurl}
+                    alt={article.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400"
+                  />
+                </div>
+                <div className="flex-1 p-5 flex flex-col justify-between bg-card/80">
+                  <div>
+                    {/* Category and Date Row */}
+                    <div className="flex flex-wrap items-center gap-3 mb-2">
+                      <span className="category-pill">{article.category}</span>
+                      <span className="text-xs text-muted-foreground">{new Date(article.date).toLocaleDateString()}</span>
+                    </div>
+                    {/* Article Title */}
+                    <Link to={`/article/${article.id}`}>
+                      <h3 className="font-bold text-lg md:text-xl text-foreground group-hover:text-esports-blue transition-colors mb-2 line-clamp-2">
+                        {article.title}
+                      </h3>
+                    </Link>
+                    {/* Excerpt */}
+                    <p className="text-muted-foreground line-clamp-3 text-sm mb-3">
+                      {article.description.substring(0, 150)}...
+                    </p>
                   </div>
-                  {/* Article Title */}
-                  <Link to={`/article/${article.slug}`}>
-                    <h3 className="font-bold text-lg md:text-xl text-foreground group-hover:text-esports-blue transition-colors mb-2 line-clamp-2">
-                      {article.title}
-                    </h3>
-                  </Link>
-                  {/* Excerpt */}
-                  <p className="text-muted-foreground line-clamp-3 text-sm mb-3">
-                    {article.excerpt}
-                  </p>
-                </div>
-                {/* Read More link */}
-                <div className="mt-2">
-                  <Link
-                    to={`/article/${article.slug}`}
-                    className="inline-flex items-center font-semibold text-esports-blue hover:underline"
-                  >
-                    Read More <ArrowRight className="ml-1 h-4 w-4" />
-                  </Link>
+                  {/* Read More link */}
+                  <div className="mt-2">
+                    <Link
+                      to={`/article/${article.id}`}
+                      className="inline-flex items-center font-semibold text-esports-blue hover:underline"
+                    >
+                      Read More <ArrowRight className="ml-1 h-4 w-4" />
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         {/* 'Explore More' Button */}
         <div className="flex justify-center mt-8">
           <Link
-            // Now simply linking to /news, which loads at the top
             to="/news"
             className="btn-primary text-lg px-6 py-2 rounded font-medium flex items-center gap-2 !bg-esports-blue hover:bg-esports-blue/90 transition-colors"
           >

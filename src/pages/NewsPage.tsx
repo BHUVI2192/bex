@@ -1,71 +1,58 @@
 
-import React, { useState, useEffect } from "react";
-import NewsCard from "@/components/NewsCard";
-import { articles, shouldRefreshData, refreshNewsData, categories } from "@/lib/data-service";
-import { toast } from "@/components/ui/use-toast";
+import React, { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "@/components/ui/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { Link } from "react-router-dom";
 
 // Popular search terms
 const popularSearches = ["Valorant", "BGMI", "eSports", "Tournament", "League of Legends", "Gaming Gear"];
 
 const NewsPage = () => {
-  const [displayedArticles, setDisplayedArticles] = useState(articles);
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Auto-refresh news data every 30 minutes
-  useEffect(() => {
-    const checkForUpdates = async () => {
-      if (shouldRefreshData()) {
-        try {
-          const refreshedData = await refreshNewsData();
-          setDisplayedArticles(refreshedData);
-          toast({
-            title: "News Updated",
-            description: "The latest news has been loaded.",
-          });
-        } catch (error) {
-          console.error("Failed to refresh news data:", error);
-        }
-      }
-    };
-    
-    // Check initially
-    checkForUpdates();
-    
-    // Set up interval to check periodically
-    const interval = setInterval(checkForUpdates, 5 * 60 * 1000); // Check every 5 minutes
-    
-    return () => clearInterval(interval);
-  }, []);
+  // Fetch news from Supabase
+  const { data: articles, isLoading } = useQuery({
+    queryKey: ['news'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('news')
+        .select('*')
+        .order('date', { ascending: false });
+      
+      if (error) throw error;
+      return data || [];
+    }
+  });
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!searchQuery.trim()) {
-      setDisplayedArticles(articles);
-      return;
-    }
-    
-    const filteredArticles = articles.filter(article => 
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    
-    setDisplayedArticles(filteredArticles);
+    // Search handled via filtering displayedArticles
   };
 
   const handlePopularSearch = (term: string) => {
     setSearchQuery(term);
-    const filteredArticles = articles.filter(article => 
-      article.title.toLowerCase().includes(term.toLowerCase()) ||
-      article.excerpt.toLowerCase().includes(term.toLowerCase()) ||
-      article.category.toLowerCase().includes(term.toLowerCase())
-    );
-    
-    setDisplayedArticles(filteredArticles);
   };
+
+  // Filter articles based on search query
+  const displayedArticles = articles?.filter(article => 
+    !searchQuery || 
+    article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    article.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    article.category.toLowerCase().includes(searchQuery.toLowerCase())
+  ) || [];
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-6">eSports News</h1>
+        <div className="text-center py-12">Loading news...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -115,7 +102,7 @@ const NewsPage = () => {
             <div className="md:flex">
               <div className="md:w-1/4 h-48 md:h-auto">
                 <img 
-                  src={article.imageUrl} 
+                  src={article.imageurl} 
                   alt={article.title} 
                   className="w-full h-full object-cover"
                 />
@@ -123,16 +110,16 @@ const NewsPage = () => {
               <div className="p-4 md:w-3/4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="category-pill">{article.category}</span>
-                  <span className="text-xs text-muted-foreground">{article.date}</span>
+                  <span className="text-xs text-muted-foreground">{new Date(article.date).toLocaleDateString()}</span>
                 </div>
                 <h3 className="text-lg font-bold mb-2 text-white">{article.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{article.excerpt}</p>
-                <a 
-                  href={`/article/${article.slug}`} 
+                <p className="text-sm text-muted-foreground mb-4">{article.description.substring(0, 150)}...</p>
+                <Link 
+                  to={`/article/${article.id}`} 
                   className="text-esports-blue hover:text-esports-blue/80 text-sm font-medium"
                 >
                   Read Full Story →
-                </a>
+                </Link>
               </div>
             </div>
           </div>
@@ -146,7 +133,7 @@ const NewsPage = () => {
           <p className="text-muted-foreground mt-2 mb-4">
             We couldn't find any articles matching "{searchQuery}".
           </p>
-          <Button onClick={() => { setSearchQuery(""); setDisplayedArticles(articles); }}>
+          <Button onClick={() => setSearchQuery("")}>
             Clear Search
           </Button>
         </div>

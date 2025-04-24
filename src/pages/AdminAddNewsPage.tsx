@@ -6,17 +6,18 @@ import { toast } from "@/components/ui/sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { categories } from "@/lib/data-service";
 import { ArrowLeft, Save } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 type FormValues = {
   title: string;
   category: string;
   excerpt: string;
-  imageUrl: string;
+  imageurl: string;
   content: string;
+  source: string;
 };
 
 const AdminAddNewsPage = () => {
@@ -26,20 +27,38 @@ const AdminAddNewsPage = () => {
       title: "",
       category: categories[0]?.id || "",
       excerpt: "",
-      imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e",
+      imageurl: "https://images.unsplash.com/photo-1542751371-adc38448a05e",
       content: "",
+      source: "Bharat eSports",
     }
   });
 
-  const onSubmit = (data: FormValues) => {
-    // In a real app, this would make an API call to add the article
-    console.log("Adding news article:", data);
-    
-    // Show success message
-    toast.success("News article added successfully!");
-    
-    // Navigate back to news management page
-    navigate("/admin/news");
+  const onSubmit = async (data: FormValues) => {
+    try {
+      // Insert the news article into the database
+      const { error } = await supabase
+        .from('news')
+        .insert([{
+          title: data.title,
+          category: data.category,
+          description: data.content,
+          imageurl: data.imageurl,
+          source: data.source,
+          // Set isverified to false by default, admin can verify later
+          isverified: false
+        }]);
+      
+      if (error) throw error;
+      
+      // Show success message
+      toast.success("News article added successfully!");
+      
+      // Navigate back to news management page
+      navigate("/admin/news");
+    } catch (error) {
+      console.error("Error adding news article:", error);
+      toast.error("Failed to add news article");
+    }
   };
 
   return (
@@ -111,12 +130,26 @@ const AdminAddNewsPage = () => {
 
             <FormField
               control={form.control}
-              name="imageUrl"
+              name="imageurl"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Image URL</FormLabel>
                   <FormControl>
                     <Input placeholder="URL for article image" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="source"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Source</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Source of the article" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -131,7 +164,7 @@ const AdminAddNewsPage = () => {
                   <FormLabel>Article Content</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="Full article content (supports HTML)"
+                      placeholder="Full article content"
                       className="min-h-[300px]"
                       {...field}
                     />
