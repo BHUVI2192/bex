@@ -12,10 +12,22 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
+// Define the Accessory type to match the database structure
+interface Accessory {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  image_url: string;
+  link: string;
+  created_at?: string | null;
+  updated_at?: string | null;
+}
+
 const AdminAccessoriesPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingAccessory, setEditingAccessory] = useState(null);
+  const [editingAccessory, setEditingAccessory] = useState<Accessory | null>(null);
   const queryClient = useQueryClient();
 
   const { data: accessories, isLoading } = useQuery({
@@ -33,7 +45,7 @@ const AdminAccessoriesPage = () => {
 
   // Delete mutation
   const deleteMutation = useMutation({
-    mutationFn: async (id) => {
+    mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('accessories')
         .delete()
@@ -53,7 +65,7 @@ const AdminAccessoriesPage = () => {
 
   // Update mutation
   const updateMutation = useMutation({
-    mutationFn: async (accessory) => {
+    mutationFn: async (accessory: Accessory) => {
       const { error } = await supabase
         .from('accessories')
         .update({
@@ -85,13 +97,13 @@ const AdminAccessoriesPage = () => {
       accessory.description.toLowerCase().includes(searchTerm.toLowerCase())
   ) || [];
 
-  const handleDelete = async (id) => {
+  const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this accessory?")) {
       deleteMutation.mutate(id);
     }
   };
 
-  const handleEdit = (accessory) => {
+  const handleEdit = (accessory: Accessory) => {
     setEditingAccessory({...accessory});
     setIsEditModalOpen(true);
   };
@@ -101,12 +113,14 @@ const AdminAccessoriesPage = () => {
     updateMutation.mutate(editingAccessory);
   };
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setEditingAccessory(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    if (editingAccessory) {
+      setEditingAccessory(prev => ({
+        ...prev!,
+        [name]: value
+      }));
+    }
   };
 
   if (isLoading) {
