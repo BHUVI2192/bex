@@ -1,4 +1,3 @@
-
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -12,11 +11,12 @@ import { ArrowLeft, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   category: z.string().min(1, "Category is required"),
-  excerpt: z.string(),
+  excerpt: z.string().optional(),
   imageurl: z.string().url("Invalid URL").min(1, "Image URL is required"),
   content: z.string().min(1, "Content is required"),
   source: z.string().min(1, "Source is required"),
@@ -26,6 +26,8 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AdminAddNewsPage = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAdminAuth();
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -39,6 +41,13 @@ const AdminAddNewsPage = () => {
   });
 
   const onSubmit = async (data: FormValues) => {
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      toast.error("You must be logged in to add news articles");
+      navigate("/admin");
+      return;
+    }
+
     try {
       console.log("Submitting news article:", data);
       
