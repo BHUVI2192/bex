@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,15 @@ const NewsPage = () => {
         .select('*')
         .order('date', { ascending: false });
       
-      if (error) throw error;
+      if (error) {
+        toast({
+          title: "Error loading news",
+          description: error.message,
+          variant: "destructive",
+        });
+        throw error;
+      }
+      
       return data || [];
     }
   });
@@ -97,47 +105,61 @@ const NewsPage = () => {
       
       {/* News Grid */}
       <div className="space-y-6">
-        {displayedArticles.map(article => (
-          <div key={article.id} className="glass-card overflow-hidden hover:neon-border transition-all duration-300">
-            <div className="md:flex">
-              <div className="md:w-1/4 h-48 md:h-auto">
-                <img 
-                  src={article.imageurl} 
-                  alt={article.title} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="p-4 md:w-3/4">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="category-pill">{article.category}</span>
-                  <span className="text-xs text-muted-foreground">{new Date(article.date).toLocaleDateString()}</span>
+        {displayedArticles.length > 0 ? (
+          displayedArticles.map(article => (
+            <div key={article.id} className="glass-card overflow-hidden hover:neon-border transition-all duration-300">
+              <div className="md:flex">
+                <div className="md:w-1/4 h-48 md:h-auto">
+                  <img 
+                    src={article.imageurl} 
+                    alt={article.title} 
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      (e.target as HTMLImageElement).src = "/placeholder.svg";
+                    }}
+                  />
                 </div>
-                <h3 className="text-lg font-bold mb-2 text-white">{article.title}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{article.description.substring(0, 150)}...</p>
-                <Link 
-                  to={`/article/${article.id}`} 
-                  className="text-esports-blue hover:text-esports-blue/80 text-sm font-medium"
-                >
-                  Read Full Story →
-                </Link>
+                <div className="p-4 md:w-3/4">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="category-pill">{article.category}</span>
+                    <span className="text-xs text-muted-foreground">{new Date(article.date).toLocaleDateString()}</span>
+                  </div>
+                  <h3 className="text-lg font-bold mb-2 text-white">{article.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {article.description && article.description.substring(0, 150)}...
+                  </p>
+                  <Link 
+                    to={`/article/${article.id}`} 
+                    className="text-esports-blue hover:text-esports-blue/80 text-sm font-medium"
+                  >
+                    Read Full Story →
+                  </Link>
+                </div>
               </div>
             </div>
+          ))
+        ) : (
+          <div className="text-center py-12">
+            <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+            <h3 className="text-xl font-medium">No articles found</h3>
+            {searchQuery ? (
+              <p className="text-muted-foreground mt-2 mb-4">
+                We couldn't find any articles matching "{searchQuery}".
+              </p>
+            ) : (
+              <p className="text-muted-foreground mt-2 mb-4">
+                There are no articles available at the moment.
+              </p>
+            )}
+            {searchQuery && (
+              <Button onClick={() => setSearchQuery("")}>
+                Clear Search
+              </Button>
+            )}
           </div>
-        ))}
+        )}
       </div>
-      
-      {displayedArticles.length === 0 && (
-        <div className="text-center py-12">
-          <Search className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-xl font-medium">No articles found</h3>
-          <p className="text-muted-foreground mt-2 mb-4">
-            We couldn't find any articles matching "{searchQuery}".
-          </p>
-          <Button onClick={() => setSearchQuery("")}>
-            Clear Search
-          </Button>
-        </div>
-      )}
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/components/ui/sonner";
 
 const Index = () => {
   // Fetch news articles from Supabase
@@ -17,7 +18,10 @@ const Index = () => {
         .order('date', { ascending: false })
         .limit(5);
       
-      if (error) throw error;
+      if (error) {
+        toast.error(`Failed to load news: ${error.message}`);
+        throw error;
+      }
       return data || [];
     }
   });
@@ -71,7 +75,7 @@ const Index = () => {
 
         {isLoading ? (
           <div className="text-center py-8">Loading latest news...</div>
-        ) : (
+        ) : articles && articles.length > 0 ? (
           <div className="flex flex-col gap-8">
             {articles.map(article => (
               <div
@@ -84,6 +88,10 @@ const Index = () => {
                     src={article.imageurl}
                     alt={article.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-400"
+                    onError={(e) => {
+                      // Fallback if image fails to load
+                      (e.target as HTMLImageElement).src = "/placeholder.svg";
+                    }}
                   />
                 </div>
                 <div className="flex-1 p-5 flex flex-col justify-between bg-card/80">
@@ -101,7 +109,7 @@ const Index = () => {
                     </Link>
                     {/* Excerpt */}
                     <p className="text-muted-foreground line-clamp-3 text-sm mb-3">
-                      {article.description.substring(0, 150)}...
+                      {article.description && article.description.substring(0, 150)}...
                     </p>
                   </div>
                   {/* Read More link */}
@@ -116,6 +124,10 @@ const Index = () => {
                 </div>
               </div>
             ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">No news articles available.</p>
           </div>
         )}
 

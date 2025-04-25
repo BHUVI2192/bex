@@ -9,18 +9,23 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { ArrowLeft, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type FormValues = {
-  name: string;
-  description: string;
-  price: string;
-  image_url: string;
-  link: string;
-};
+const formSchema = z.object({
+  name: z.string().min(1, "Name is required"),
+  description: z.string().min(1, "Description is required"),
+  price: z.string().min(1, "Price is required"),
+  image_url: z.string().url("Invalid URL").min(1, "Image URL is required"),
+  link: z.string().url("Invalid URL").min(1, "Link is required"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const AdminAddAccessoryPage = () => {
   const navigate = useNavigate();
   const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       description: "",
@@ -32,17 +37,32 @@ const AdminAddAccessoryPage = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      console.log("Submitting accessory:", data);
+      
+      // Insert the accessory into the database
       const { error } = await supabase
         .from('accessories')
-        .insert([data]);
+        .insert([{
+          name: data.name,
+          description: data.description,
+          price: data.price,
+          image_url: data.image_url,
+          link: data.link,
+          // Set timestamps
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        }]);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
       
       toast.success("Accessory added successfully!");
       navigate("/admin/accessories");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding accessory:', error);
-      toast.error("Failed to add accessory");
+      toast.error(`Failed to add accessory: ${error.message || "Unknown error"}`);
     }
   };
 

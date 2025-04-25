@@ -10,19 +10,24 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { categories } from "@/lib/data-service";
 import { ArrowLeft, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-type FormValues = {
-  title: string;
-  category: string;
-  excerpt: string;
-  imageurl: string;
-  content: string;
-  source: string;
-};
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  category: z.string().min(1, "Category is required"),
+  excerpt: z.string(),
+  imageurl: z.string().url("Invalid URL").min(1, "Image URL is required"),
+  content: z.string().min(1, "Content is required"),
+  source: z.string().min(1, "Source is required"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 const AdminAddNewsPage = () => {
   const navigate = useNavigate();
   const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
       category: categories[0]?.id || "",
@@ -35,6 +40,8 @@ const AdminAddNewsPage = () => {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      console.log("Submitting news article:", data);
+      
       // Insert the news article into the database
       const { error } = await supabase
         .from('news')
@@ -44,20 +51,25 @@ const AdminAddNewsPage = () => {
           description: data.content,
           imageurl: data.imageurl,
           source: data.source,
-          // Set isverified to false by default, admin can verify later
-          isverified: false
+          // Set date to current timestamp
+          date: new Date().toISOString(),
+          // Set isverified to true so it shows up immediately
+          isverified: true
         }]);
       
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error:", error);
+        throw error;
+      }
       
       // Show success message
       toast.success("News article added successfully!");
       
       // Navigate back to news management page
       navigate("/admin/news");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding news article:", error);
-      toast.error("Failed to add news article");
+      toast.error(`Failed to add news article: ${error.message || "Unknown error"}`);
     }
   };
 
