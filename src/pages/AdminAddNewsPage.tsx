@@ -8,10 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { categories } from "@/lib/data-service";
 import { ArrowLeft, Save } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { addNewsArticle } from "@/services/mongoService";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -49,27 +49,20 @@ const AdminAddNewsPage = () => {
     }
 
     try {
-      console.log("Submitting news article:", data);
+      console.log("Submitting news article to MongoDB:", data);
       
-      // Insert the news article into the database
-      const { error } = await supabase
-        .from('news')
-        .insert([{
-          title: data.title,
-          category: data.category,
-          description: data.content,
-          imageurl: data.imageurl,
-          source: data.source,
-          // Set date to current timestamp
-          date: new Date().toISOString(),
-          // Set isverified to true so it shows up immediately
-          isverified: true
-        }]);
-      
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
-      }
+      // Insert the news article into MongoDB
+      await addNewsArticle({
+        title: data.title,
+        category: data.category,
+        description: data.content,
+        imageurl: data.imageurl,
+        source: data.source,
+        // Set date to current timestamp
+        date: new Date().toISOString(),
+        // Set isverified to true so it shows up immediately
+        isverified: true
+      });
       
       // Show success message
       toast.success("News article added successfully!");

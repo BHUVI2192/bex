@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -10,19 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-
-// Define the News article type to match the database structure
-interface NewsArticle {
-  id: string;
-  title: string;
-  category: string;
-  date: string;
-  imageurl: string;
-  description: string;
-  source: string;
-  isverified: boolean;
-}
+import { getAllNews, updateNewsArticle, deleteNewsArticle, NewsArticle } from "@/services/mongoService";
 
 const AdminNewsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,29 +18,29 @@ const AdminNewsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Fetch news articles from Supabase
+  // Fetch news articles from MongoDB
   const { data: newsArticles, isLoading } = useQuery({
     queryKey: ['news'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('news')
-        .select('*')
-        .order('date', { ascending: false });
-      
-      if (error) throw error;
-      return data || [];
+      try {
+        const data = await getAllNews();
+        return data || [];
+      } catch (error) {
+        console.error("Error fetching news:", error);
+        toast({
+          title: "Error loading news",
+          description: "Failed to load news articles",
+          variant: "destructive",
+        });
+        return [];
+      }
     }
   });
 
   // Delete mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('news')
-        .delete()
-        .eq('id', id);
-      
-      if (error) throw error;
+      return await deleteNewsArticle(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
@@ -68,18 +55,14 @@ const AdminNewsPage = () => {
   // Update mutation
   const updateMutation = useMutation({
     mutationFn: async (article: NewsArticle) => {
-      const { error } = await supabase
-        .from('news')
-        .update({
-          title: article.title,
-          category: article.category,
-          imageurl: article.imageurl,
-          description: article.description,
-          source: article.source
-        })
-        .eq('id', article.id);
-      
-      if (error) throw error;
+      if (!article.id) throw new Error("Article ID is required");
+      return await updateNewsArticle(article.id, {
+        title: article.title,
+        category: article.category,
+        imageurl: article.imageurl,
+        description: article.description,
+        source: article.source
+      });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });

@@ -1,12 +1,11 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
+import { getAllNews } from "@/services/mongoService";
 
 // Popular search terms
 const popularSearches = ["Valorant", "BGMI", "eSports", "Tournament", "League of Legends", "Gaming Gear"];
@@ -14,25 +13,22 @@ const popularSearches = ["Valorant", "BGMI", "eSports", "Tournament", "League of
 const NewsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   
-  // Fetch news from Supabase
+  // Fetch news from MongoDB
   const { data: articles, isLoading } = useQuery({
     queryKey: ['news'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('news')
-        .select('*')
-        .order('date', { ascending: false });
-      
-      if (error) {
+      try {
+        const data = await getAllNews();
+        return data || [];
+      } catch (error) {
+        console.error("Error fetching news:", error);
         toast({
           title: "Error loading news",
-          description: error.message,
+          description: "Failed to load news articles",
           variant: "destructive",
         });
-        throw error;
+        return [];
       }
-      
-      return data || [];
     }
   });
 
