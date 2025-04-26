@@ -18,7 +18,6 @@ const AdminNewsPage = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // Fetch news articles from MongoDB
   const { data: newsArticles, isLoading } = useQuery({
     queryKey: ['news'],
     queryFn: async () => {
@@ -37,22 +36,6 @@ const AdminNewsPage = () => {
     }
   });
 
-  // Delete mutation
-  const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await deleteNewsArticle(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['news'] });
-      toast.success("News article deleted successfully!");
-    },
-    onError: (error) => {
-      console.error('Error deleting news article:', error);
-      toast.error("Failed to delete news article");
-    }
-  });
-
-  // Update mutation
   const updateMutation = useMutation({
     mutationFn: async (article: NewsArticle) => {
       if (!article.id) throw new Error("Article ID is required");
@@ -67,15 +50,28 @@ const AdminNewsPage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
       setIsEditModalOpen(false);
-      toast.success("News article updated successfully!");
+      toast("News article updated successfully!");
     },
     onError: (error) => {
       console.error('Error updating news article:', error);
-      toast.error("Failed to update news article");
+      toast("Failed to update news article");
     }
   });
 
-  // Filter articles based on search term
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      return await deleteNewsArticle(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['news'] });
+      toast("News article deleted successfully!");
+    },
+    onError: (error) => {
+      console.error('Error deleting news article:', error);
+      toast("Failed to delete news article");
+    }
+  });
+
   const filteredArticles = newsArticles?.filter(
     article => 
       article.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -187,7 +183,6 @@ const AdminNewsPage = () => {
         </Table>
       </div>
 
-      {/* Edit News Article Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
