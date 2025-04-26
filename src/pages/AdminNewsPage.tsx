@@ -1,21 +1,19 @@
+
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "@/components/ui/sonner";
-import { Edit, Plus, Trash2 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { Plus } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { getAllNews, updateNewsArticle, deleteNewsArticle, NewsArticle } from "@/services/mongoService";
+import { NewsSearchBar } from "@/components/news/NewsSearchBar";
+import { NewsTable } from "@/components/news/NewsTable";
+import { EditNewsDialog } from "@/components/news/EditNewsDialog";
 
 const AdminNewsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editingArticle, setEditingArticle] = useState<NewsArticle | null>(null);
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const { data: newsArticles, isLoading } = useQuery({
@@ -26,27 +24,14 @@ const AdminNewsPage = () => {
         return data || [];
       } catch (error) {
         console.error("Error fetching news:", error);
-        toast({
-          title: "Error loading news",
-          description: "Failed to load news articles",
-          variant: "destructive",
-        });
+        toast("Failed to load news articles");
         return [];
       }
     }
   });
 
   const updateMutation = useMutation({
-    mutationFn: async (article: NewsArticle) => {
-      if (!article.id) throw new Error("Article ID is required");
-      return await updateNewsArticle(article.id, {
-        title: article.title,
-        category: article.category,
-        imageurl: article.imageurl,
-        description: article.description,
-        source: article.source
-      });
-    },
+    mutationFn: updateNewsArticle,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
       setIsEditModalOpen(false);
@@ -59,9 +44,7 @@ const AdminNewsPage = () => {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: async (id: string) => {
-      return await deleteNewsArticle(id);
-    },
+    mutationFn: deleteNewsArticle,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
       toast("News article deleted successfully!");
@@ -90,8 +73,15 @@ const AdminNewsPage = () => {
   };
 
   const handleUpdateArticle = () => {
-    if (!editingArticle) return;
-    updateMutation.mutate(editingArticle);
+    if (!editingArticle || !editingArticle.id) return;
+    updateMutation.mutate({
+      id: editingArticle.id,
+      title: editingArticle.title,
+      category: editingArticle.category,
+      imageurl: editingArticle.imageurl,
+      description: editingArticle.description,
+      source: editingArticle.source
+    });
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -128,13 +118,10 @@ const AdminNewsPage = () => {
       </div>
 
       <div className="flex justify-between items-center mb-6">
-        <div className="w-1/2">
-          <Input
-            placeholder="Search by title or category..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
+        <NewsSearchBar
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
         <Link to="/admin/news/add">
           <Button className="bg-esports-blue hover:bg-esports-blue/90">
             <Plus className="h-4 w-4 mr-2" /> Add News Article
@@ -142,133 +129,19 @@ const AdminNewsPage = () => {
         </Link>
       </div>
 
-      <div className="border rounded-lg overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredArticles.map((article) => (
-              <TableRow key={article.id}>
-                <TableCell className="font-medium">{article.title}</TableCell>
-                <TableCell>{article.category}</TableCell>
-                <TableCell>{new Date(article.date).toLocaleDateString()}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    <Button 
-                      variant="ghost" 
-                      size="sm"
-                      onClick={() => handleEdit(article)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      onClick={() => handleDelete(article.id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-100"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+      <NewsTable
+        articles={filteredArticles}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
 
-      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          <DialogHeader>
-            <DialogTitle>Edit News Article</DialogTitle>
-          </DialogHeader>
-          {editingArticle && (
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="title" className="text-right">
-                  Title
-                </Label>
-                <Input
-                  id="title"
-                  name="title"
-                  value={editingArticle.title}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="category" className="text-right">
-                  Category
-                </Label>
-                <Input
-                  id="category"
-                  name="category"
-                  value={editingArticle.category}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="imageurl" className="text-right">
-                  Image URL
-                </Label>
-                <Input
-                  id="imageurl"
-                  name="imageurl"
-                  value={editingArticle.imageurl}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="source" className="text-right">
-                  Source
-                </Label>
-                <Input
-                  id="source"
-                  name="source"
-                  value={editingArticle.source}
-                  onChange={handleChange}
-                  className="col-span-3"
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">
-                  Description
-                </Label>
-                <Textarea
-                  id="description"
-                  name="description"
-                  value={editingArticle.description}
-                  onChange={handleChange}
-                  className="col-span-3"
-                  rows={3}
-                />
-              </div>
-            </div>
-          )}
-          <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsEditModalOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleUpdateArticle}
-              className="bg-esports-blue hover:bg-esports-blue/90"
-            >
-              Save Changes
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditNewsDialog
+        isOpen={isEditModalOpen}
+        onOpenChange={setIsEditModalOpen}
+        article={editingArticle}
+        onArticleChange={handleChange}
+        onSave={handleUpdateArticle}
+      />
     </div>
   );
 };
