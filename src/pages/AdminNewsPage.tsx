@@ -31,7 +31,10 @@ const AdminNewsPage = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: updateNewsArticle,
+    mutationFn: async (updates: NewsArticle) => {
+      if (!updates.id) throw new Error("Article ID is required");
+      return await updateNewsArticle(updates.id, updates);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['news'] });
       setIsEditModalOpen(false);
@@ -74,14 +77,7 @@ const AdminNewsPage = () => {
 
   const handleUpdateArticle = () => {
     if (!editingArticle || !editingArticle.id) return;
-    updateMutation.mutate({
-      id: editingArticle.id,
-      title: editingArticle.title,
-      category: editingArticle.category,
-      imageurl: editingArticle.imageurl,
-      description: editingArticle.description,
-      source: editingArticle.source
-    });
+    updateMutation.mutate(editingArticle);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
