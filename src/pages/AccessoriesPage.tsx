@@ -1,12 +1,15 @@
-
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, ShoppingCart } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { realtimeService } from "@/services/realtimeService";
+import { toast } from "@/components/ui/use-toast";
 
 const AccessoriesPage = () => {
+  const queryClient = useQueryClient();
+
   const { data: accessories, isLoading } = useQuery({
     queryKey: ['accessories'],
     queryFn: async () => {
@@ -19,6 +22,22 @@ const AccessoriesPage = () => {
       return data;
     }
   });
+
+  useEffect(() => {
+    // Subscribe to accessories updates
+    const unsubscribe = realtimeService.subscribe('accessoriesUpdated', () => {
+      // Invalidate and refetch accessories data
+      queryClient.invalidateQueries({ queryKey: ['accessories'] });
+      toast({
+        title: "Accessories Updated",
+        description: "New items are available",
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [queryClient]);
 
   if (isLoading) {
     return (

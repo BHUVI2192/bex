@@ -1,19 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import { getAllNews } from "@/services/mongoService";
+import { realtimeService } from "@/services/realtimeService";
 
 // Popular search terms
 const popularSearches = ["Valorant", "BGMI", "eSports", "Tournament", "League of Legends", "Gaming Gear"];
 
 const NewsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const queryClient = useQueryClient();
   
-  // Fetch news from MongoDB
   const { data: articles, isLoading } = useQuery({
     queryKey: ['news'],
     queryFn: async () => {
@@ -31,6 +32,22 @@ const NewsPage = () => {
       }
     }
   });
+
+  useEffect(() => {
+    // Subscribe to news updates
+    const unsubscribe = realtimeService.subscribe('newsUpdated', () => {
+      // Invalidate and refetch news data
+      queryClient.invalidateQueries({ queryKey: ['news'] });
+      toast({
+        title: "News Updated",
+        description: "New content is available",
+      });
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [queryClient]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
