@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect } from "react";
-import { Search } from "lucide-react";
+import { Search, Edit, Trash2, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
-import { getAllNews } from "@/services/mongoService";
+import { getAllNews, deleteNewsArticle } from "@/services/mongoService";
 import { realtimeService } from "@/services/realtimeService";
 
 // Popular search terms
@@ -49,6 +50,25 @@ const NewsPage = () => {
     };
   }, [queryClient]);
 
+  const deleteMutation = useMutation({
+    mutationFn: deleteNewsArticle,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['news'] });
+      toast({
+        title: "News article deleted",
+        description: "The article has been successfully removed",
+      });
+    },
+    onError: (error) => {
+      console.error('Error deleting news article:', error);
+      toast({
+        title: "Deletion failed",
+        description: "Failed to delete news article",
+        variant: "destructive",
+      });
+    }
+  });
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // Search handled via filtering displayedArticles
@@ -56,6 +76,12 @@ const NewsPage = () => {
 
   const handlePopularSearch = (term: string) => {
     setSearchQuery(term);
+  };
+
+  const handleDelete = (id: string) => {
+    if (confirm("Are you sure you want to delete this news article?")) {
+      deleteMutation.mutate(id);
+    }
   };
 
   // Filter articles based on search query
@@ -77,7 +103,14 @@ const NewsPage = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">eSports News</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">eSports News</h1>
+        <Link to="/news/add">
+          <Button className="bg-esports-blue hover:bg-esports-blue/90">
+            <Plus className="h-4 w-4 mr-2" /> Add News Article
+          </Button>
+        </Link>
+      </div>
       
       {/* Search Section */}
       <div className="glass-card p-6 mb-8">
@@ -136,9 +169,26 @@ const NewsPage = () => {
                 <div className="p-4 md:w-3/4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="category-pill">{article.category}</span>
+                    <div className="flex gap-2">
+                      <Link to={`/news/edit/${article.id}`}>
+                        <Button variant="ghost" size="sm">
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => handleDelete(article.id!)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <h3 className="text-lg font-bold mb-2 text-white">{article.title}</h3>
                     <span className="text-xs text-muted-foreground">{new Date(article.date).toLocaleDateString()}</span>
                   </div>
-                  <h3 className="text-lg font-bold mb-2 text-white">{article.title}</h3>
                   <p className="text-sm text-muted-foreground mb-4">
                     {article.description && article.description.substring(0, 150)}...
                   </p>

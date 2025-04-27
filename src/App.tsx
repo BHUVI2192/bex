@@ -12,63 +12,31 @@ import SearchPage from "@/pages/SearchPage";
 import ContactPage from "@/pages/ContactPage";
 import AccessoriesPage from "@/pages/AccessoriesPage";
 import NotFound from "@/pages/NotFound";
-import AdminLoginPage from "@/pages/AdminLoginPage";
-import AdminDashboardPage from "@/pages/AdminDashboardPage";
-import AdminNewsPage from "@/pages/AdminNewsPage";
-import AdminAddNewsPage from "@/pages/AdminAddNewsPage";
-import AdminAccessoriesPage from "@/pages/AdminAccessoriesPage";
-import AdminAddAccessoryPage from "@/pages/AdminAddAccessoryPage";
-import AdminProtectedRoute from "@/components/AdminProtectedRoute";
-import { AdminAuthProvider } from "@/contexts/AdminAuthContext";
+import EditNewsPage from "@/pages/EditNewsPage";
+import AddNewsPage from "@/pages/AddNewsPage";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AdminAuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Layout />}>
-              <Route index element={<Index />} />
-              <Route path="news" element={<NewsPage />} />
-              <Route path="article/:slug" element={<ArticlePage />} />
-              <Route path="search" element={<SearchPage />} />
-              <Route path="contact" element={<ContactPage />} />
-              <Route path="accessories" element={<AccessoriesPage />} />
-              <Route path="admin" element={<AdminLoginPage />} />
-              <Route path="admin/dashboard" element={
-                <AdminProtectedRoute>
-                  <AdminDashboardPage />
-                </AdminProtectedRoute>
-              } />
-              <Route path="admin/news" element={
-                <AdminProtectedRoute>
-                  <AdminNewsPage />
-                </AdminProtectedRoute>
-              } />
-              <Route path="admin/news/add" element={
-                <AdminProtectedRoute>
-                  <AdminAddNewsPage />
-                </AdminProtectedRoute>
-              } />
-              <Route path="admin/accessories" element={
-                <AdminProtectedRoute>
-                  <AdminAccessoriesPage />
-                </AdminProtectedRoute>
-              } />
-              <Route path="admin/accessories/add" element={
-                <AdminProtectedRoute>
-                  <AdminAddAccessoryPage />
-                </AdminProtectedRoute>
-              } />
-              <Route path="*" element={<NotFound />} />
-            </Route>
-          </Routes>
-        </BrowserRouter>
-      </AdminAuthProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Index />} />
+            <Route path="news" element={<NewsPage />} />
+            <Route path="article/:slug" element={<ArticlePage />} />
+            <Route path="search" element={<SearchPage />} />
+            <Route path="contact" element={<ContactPage />} />
+            <Route path="accessories" element={<AccessoriesPage />} />
+            <Route path="news/edit/:id" element={<EditNewsPage />} />
+            <Route path="news/add" element={<AddNewsPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );

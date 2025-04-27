@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -10,7 +11,6 @@ import { categories } from "@/lib/data-service";
 import { ArrowLeft, Save } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
 import { addNewsArticle } from "@/services/mongoService";
 
 const formSchema = z.object({
@@ -24,9 +24,8 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const AdminAddNewsPage = () => {
+const AddNewsPage = () => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useAdminAuth();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -41,13 +40,6 @@ const AdminAddNewsPage = () => {
   });
 
   const onSubmit = async (data: FormValues) => {
-    // Check if user is authenticated
-    if (!isAuthenticated) {
-      toast.error("You must be logged in to add news articles");
-      navigate("/admin");
-      return;
-    }
-
     try {
       console.log("Submitting news article to MongoDB:", data);
       
@@ -65,13 +57,13 @@ const AdminAddNewsPage = () => {
       });
       
       // Show success message
-      toast.success("News article added successfully!");
+      toast("News article added successfully!");
       
-      // Navigate back to news management page
-      navigate("/admin/news");
+      // Navigate back to news page
+      navigate("/news");
     } catch (error: any) {
       console.error("Error adding news article:", error);
-      toast.error(`Failed to add news article: ${error.message || "Unknown error"}`);
+      toast("Failed to add news article: " + (error.message || "Unknown error"));
     }
   };
 
@@ -79,7 +71,7 @@ const AdminAddNewsPage = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Add News Article</h1>
-        <Button variant="outline" onClick={() => navigate("/admin/news")}>
+        <Button variant="outline" onClick={() => navigate("/news")}>
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to News
         </Button>
       </div>
@@ -200,4 +192,4 @@ const AdminAddNewsPage = () => {
   );
 };
 
-export default AdminAddNewsPage;
+export default AddNewsPage;
