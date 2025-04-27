@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Mail, Send, Instagram, Youtube, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import {
 } from "@/components/ui/card";
 
 const ContactPage = () => {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -28,25 +26,17 @@ const ContactPage = () => {
     setFormData(prev => ({ ...prev, [id]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('send-contact', {
-        body: formData
-      });
-
-      if (error) throw error;
-
-      toast.success("Message sent successfully! We'll get back to you soon.");
-      setFormData({ name: "", email: "", message: "" });
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error("Failed to send message. Please try again later.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    // Format the WhatsApp message with form data
+    const whatsappNumber = "9902845242";
+    const message = `Name: ${formData.name}%0AEmail: ${formData.email}%0AMessage: ${formData.message}`;
+    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${message}`;
+    window.open(whatsappUrl, "_blank");
+    
+    // Clear form and show success message
+    toast.success("Redirecting to WhatsApp...");
+    setFormData({ name: "", email: "", message: "" });
   };
 
   const handleWhatsAppContact = () => {
@@ -140,7 +130,7 @@ const ContactPage = () => {
               <CardHeader>
                 <CardTitle className="text-2xl">Leave a Message</CardTitle>
                 <CardDescription>
-                  Send us a message and we'll get back to you soon
+                  Send us a message via WhatsApp
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -188,16 +178,9 @@ const ContactPage = () => {
                   </div>
                   <Button 
                     type="submit" 
-                    className="w-full bg-esports-blue hover:bg-esports-blue/90" 
-                    disabled={isSubmitting}
+                    className="w-full bg-esports-blue hover:bg-esports-blue/90"
                   >
-                    {isSubmitting ? (
-                      "Sending..."
-                    ) : (
-                      <>
-                        Send Message <Send className="ml-2 h-4 w-4" />
-                      </>
-                    )}
+                    Send via WhatsApp <Send className="ml-2 h-4 w-4" />
                   </Button>
                 </form>
               </CardContent>

@@ -1,18 +1,20 @@
 
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Menu, Plus } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
+import { Menu, Plus, PenSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthorized, setIsAuthorized] = useState(false);
+  const location = useLocation();
 
   // Check if there's a saved access token in localStorage
   useEffect(() => {
     const checkAuthorization = () => {
       const savedAccessCode = localStorage.getItem("news_access_code");
-      setIsAuthorized(!!savedAccessCode);
+      const AUTHORIZED_EDITORS = ["admin123", "editor456", "bharat789"];
+      setIsAuthorized(savedAccessCode && AUTHORIZED_EDITORS.includes(savedAccessCode));
     };
     
     // Check on mount
@@ -47,15 +49,15 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className="text-white hover:text-esports-blue transition-colors">Home</Link>
-            <Link to="/news" className="text-white hover:text-esports-blue transition-colors">News</Link>
+            <Link to="/" className={`text-white hover:text-esports-blue transition-colors ${location.pathname === '/' ? 'text-esports-blue' : ''}`}>Home</Link>
+            <Link to="/news" className={`text-white hover:text-esports-blue transition-colors ${location.pathname === '/news' ? 'text-esports-blue' : ''}`}>News</Link>
             {isAuthorized && (
-              <Link to="/news/add" className="text-white hover:text-esports-blue transition-colors flex items-center">
-                <Plus className="h-4 w-4 mr-1" /> Add News
+              <Link to="/news/add" className={`text-white hover:text-esports-blue transition-colors flex items-center ${location.pathname === '/news/add' ? 'text-esports-blue' : ''}`}>
+                <PenSquare className="h-4 w-4 mr-1" /> Editor
               </Link>
             )}
-            <Link to="/accessories" className="text-white hover:text-esports-blue transition-colors">Accessories</Link>
-            <Link to="/contact" className="text-white hover:text-esports-blue transition-colors">Contact</Link>
+            <Link to="/accessories" className={`text-white hover:text-esports-blue transition-colors ${location.pathname === '/accessories' ? 'text-esports-blue' : ''}`}>Accessories</Link>
+            <Link to="/contact" className={`text-white hover:text-esports-blue transition-colors ${location.pathname === '/contact' ? 'text-esports-blue' : ''}`}>Contact</Link>
           </div>
 
           <div className="flex items-center gap-2">
@@ -73,13 +75,15 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden absolute left-0 right-0 top-full bg-esports-darker border-b border-esports-blue/20 animate-fade-in">
             <div className="container mx-auto py-4 px-4 flex flex-col gap-4">
-              <Link to="/" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Home</Link>
-              <Link to="/news" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>News</Link>
+              <Link to="/" className={`text-white hover:text-esports-blue transition-colors py-2 ${location.pathname === '/' ? 'text-esports-blue' : ''}`} onClick={() => setIsMenuOpen(false)}>Home</Link>
+              <Link to="/news" className={`text-white hover:text-esports-blue transition-colors py-2 ${location.pathname === '/news' ? 'text-esports-blue' : ''}`} onClick={() => setIsMenuOpen(false)}>News</Link>
               {isAuthorized && (
-                <Link to="/news/add" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Add News</Link>
+                <Link to="/news/add" className={`text-white hover:text-esports-blue transition-colors py-2 flex items-center ${location.pathname === '/news/add' ? 'text-esports-blue' : ''}`} onClick={() => setIsMenuOpen(false)}>
+                  <PenSquare className="h-4 w-4 mr-1" /> Editor
+                </Link>
               )}
-              <Link to="/accessories" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Accessories</Link>
-              <Link to="/contact" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Contact</Link>
+              <Link to="/accessories" className={`text-white hover:text-esports-blue transition-colors py-2 ${location.pathname === '/accessories' ? 'text-esports-blue' : ''}`} onClick={() => setIsMenuOpen(false)}>Accessories</Link>
+              <Link to="/contact" className={`text-white hover:text-esports-blue transition-colors py-2 ${location.pathname === '/contact' ? 'text-esports-blue' : ''}`} onClick={() => setIsMenuOpen(false)}>Contact</Link>
             </div>
           </div>
         )}

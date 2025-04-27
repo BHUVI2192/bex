@@ -31,6 +31,12 @@ const getHeaders = () => ({
 // Get all news articles
 export const getAllNews = async (): Promise<NewsArticle[]> => {
   try {
+    // Check if API key is the default placeholder
+    if (API_KEY === "YOUR_MONGODB_API_KEY") {
+      console.error("MongoDB API key not configured. Please replace the placeholder with a real API key.");
+      return []; // Return empty array instead of failing
+    }
+    
     const response = await axios({
       method: 'post',
       url: `${API_URL}/action/find`,
@@ -47,13 +53,20 @@ export const getAllNews = async (): Promise<NewsArticle[]> => {
     return response.data.documents || [];
   } catch (error) {
     console.error("Error fetching news from MongoDB:", error);
-    throw error;
+    // Return empty array instead of throwing error
+    return [];
   }
 };
 
 // Add a news article
 export const addNewsArticle = async (article: NewsArticle): Promise<{ insertedId: string }> => {
   try {
+    // Check if API key is the default placeholder
+    if (API_KEY === "YOUR_MONGODB_API_KEY") {
+      console.error("MongoDB API key not configured. Please replace the placeholder with a real API key.");
+      throw new Error("MongoDB API key not configured. Please set up your database connection first.");
+    }
+    
     const response = await axios({
       method: 'post',
       url: `${API_URL}/action/insertOne`,
@@ -81,6 +94,12 @@ export const addNewsArticle = async (article: NewsArticle): Promise<{ insertedId
 // Delete a news article
 export const deleteNewsArticle = async (id: string): Promise<{ deletedCount: number }> => {
   try {
+    // Check if API key is the default placeholder
+    if (API_KEY === "YOUR_MONGODB_API_KEY") {
+      console.error("MongoDB API key not configured. Please replace the placeholder with a real API key.");
+      throw new Error("MongoDB API key not configured. Please set up your database connection first.");
+    }
+    
     const response = await axios({
       method: 'post',
       url: `${API_URL}/action/deleteOne`,
@@ -104,6 +123,12 @@ export const deleteNewsArticle = async (id: string): Promise<{ deletedCount: num
 // Update a news article
 export const updateNewsArticle = async (id: string, updates: Partial<NewsArticle>): Promise<{ modifiedCount: number }> => {
   try {
+    // Check if API key is the default placeholder
+    if (API_KEY === "YOUR_MONGODB_API_KEY") {
+      console.error("MongoDB API key not configured. Please replace the placeholder with a real API key.");
+      throw new Error("MongoDB API key not configured. Please set up your database connection first.");
+    }
+    
     const response = await axios({
       method: 'post',
       url: `${API_URL}/action/updateOne`,
