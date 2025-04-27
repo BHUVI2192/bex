@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { toast } from "@/components/ui/sonner";
@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { categories } from "@/lib/data-service";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Lock } from "lucide-react";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { addNewsArticle } from "@/services/mongoService";
@@ -26,6 +26,23 @@ type FormValues = z.infer<typeof formSchema>;
 
 const AddNewsPage = () => {
   const navigate = useNavigate();
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [isChecking, setIsChecking] = useState(true);
+
+  useEffect(() => {
+    // Check if user has editor permissions
+    const savedAccessCode = localStorage.getItem("news_access_code");
+    const AUTHORIZED_EDITORS = ["admin123", "editor456", "bharat789"];
+    
+    if (savedAccessCode && AUTHORIZED_EDITORS.includes(savedAccessCode)) {
+      setIsAuthorized(true);
+    } else {
+      toast.error("You don't have permission to add news");
+      navigate("/news");
+    }
+    
+    setIsChecking(false);
+  }, [navigate]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -66,6 +83,27 @@ const AddNewsPage = () => {
       toast("Failed to add news article: " + (error.message || "Unknown error"));
     }
   };
+
+  if (isChecking) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <p>Checking permissions...</p>
+      </div>
+    );
+  }
+
+  if (!isAuthorized) {
+    return (
+      <div className="container mx-auto px-4 py-8 text-center">
+        <div className="max-w-md mx-auto p-8 border rounded-lg">
+          <Lock className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+          <h1 className="text-2xl font-bold mb-4">Access Restricted</h1>
+          <p className="mb-6">You don't have permission to access this page.</p>
+          <Button onClick={() => navigate("/news")}>Back to News</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

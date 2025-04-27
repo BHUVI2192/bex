@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { Mail, Send, Instagram, Youtube } from "lucide-react";
+import { Mail, Send, Instagram, Youtube, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -47,6 +47,13 @@ const ContactPage = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleWhatsAppContact = () => {
+    // Format the WhatsApp API URL with the provided number
+    const whatsappNumber = "9902845242";
+    const whatsappUrl = `https://wa.me/${whatsappNumber}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -105,74 +112,97 @@ const ContactPage = () => {
           </Card>
         </div>
         
-        {/* Contact Form */}
+        {/* Contact Form and WhatsApp Section */}
         <div className="lg:col-span-2">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Contact Us</CardTitle>
-              <CardDescription>
-                Send us a message and we'll get back to you as soon as possible.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label htmlFor="name" className="block text-sm font-medium mb-1">
-                    Name
-                  </label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    placeholder="Your name"
-                    required
-                    className="border-esports-blue/30 focus:border-esports-blue"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium mb-1">
-                    Email
-                  </label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    placeholder="your@email.com"
-                    required
-                    className="border-esports-blue/30 focus:border-esports-blue"
-                  />
-                </div>
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium mb-1">
-                    Message
-                  </label>
-                  <Textarea
-                    id="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    placeholder="Type your message here..."
-                    className="min-h-[150px] border-esports-blue/30 focus:border-esports-blue"
-                    required
-                  />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* WhatsApp Contact Card */}
+            <Card className="h-full bg-gradient-to-br from-green-600/20 to-green-700/10">
+              <CardHeader>
+                <CardTitle className="text-2xl">Contact via WhatsApp</CardTitle>
+                <CardDescription>
+                  Get faster responses through WhatsApp
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center space-y-4">
+                <Phone className="h-16 w-16 text-green-600" />
+                <p className="text-center">Connect with us directly on WhatsApp for immediate assistance</p>
                 <Button 
-                  type="submit" 
-                  className="w-full bg-esports-blue hover:bg-esports-blue/90" 
-                  disabled={isSubmitting}
+                  onClick={handleWhatsAppContact}
+                  className="w-full bg-green-600 hover:bg-green-700 text-white"
                 >
-                  {isSubmitting ? (
-                    "Sending..."
-                  ) : (
-                    <>
-                      Send Message <Send className="ml-2 h-4 w-4" />
-                    </>
-                  )}
+                  <span className="mr-2">Chat on WhatsApp</span> +91 9902845242
                 </Button>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+
+            {/* Contact Form */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-2xl">Leave a Message</CardTitle>
+                <CardDescription>
+                  Send us a message and we'll get back to you soon
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium mb-1">
+                      Name
+                    </label>
+                    <Input
+                      id="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Your name"
+                      required
+                      className="border-esports-blue/30 focus:border-esports-blue"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium mb-1">
+                      Email
+                    </label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="your@email.com"
+                      required
+                      className="border-esports-blue/30 focus:border-esports-blue"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="message" className="block text-sm font-medium mb-1">
+                      Message
+                    </label>
+                    <Textarea
+                      id="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      placeholder="Type your message here..."
+                      className="min-h-[100px] border-esports-blue/30 focus:border-esports-blue"
+                      required
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-esports-blue hover:bg-esports-blue/90" 
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      "Sending..."
+                    ) : (
+                      <>
+                        Send Message <Send className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     </div>

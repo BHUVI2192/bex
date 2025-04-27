@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { Search, Edit, Trash2, Plus } from "lucide-react";
+import { Search, Edit, Trash2, Plus, Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "@/components/ui/use-toast";
@@ -12,9 +12,24 @@ import { realtimeService } from "@/services/realtimeService";
 // Popular search terms
 const popularSearches = ["Valorant", "BGMI", "eSports", "Tournament", "League of Legends", "Gaming Gear"];
 
+// List of authorized editors by their access code
+const AUTHORIZED_EDITORS = ["admin123", "editor456", "bharat789"];
+
 const NewsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
+  const [accessCode, setAccessCode] = useState("");
+  const [isAuthorized, setIsAuthorized] = useState(false);
+  const [showAccessForm, setShowAccessForm] = useState(false);
   const queryClient = useQueryClient();
+
+  // Check if there's a saved access token in localStorage
+  useEffect(() => {
+    const savedAccessCode = localStorage.getItem("news_access_code");
+    if (savedAccessCode && AUTHORIZED_EDITORS.includes(savedAccessCode)) {
+      setAccessCode(savedAccessCode);
+      setIsAuthorized(true);
+    }
+  }, []);
   
   const { data: articles, isLoading } = useQuery({
     queryKey: ['news'],
@@ -84,6 +99,35 @@ const NewsPage = () => {
     }
   };
 
+  const handleAccessSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (AUTHORIZED_EDITORS.includes(accessCode)) {
+      setIsAuthorized(true);
+      localStorage.setItem("news_access_code", accessCode);
+      setShowAccessForm(false);
+      toast({
+        title: "Access granted",
+        description: "You now have editor permissions",
+      });
+    } else {
+      toast({
+        title: "Access denied",
+        description: "Invalid access code",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthorized(false);
+    setAccessCode("");
+    localStorage.removeItem("news_access_code");
+    toast({
+      title: "Logged out",
+      description: "Editor permissions revoked",
+    });
+  };
+
   // Filter articles based on search query
   const displayedArticles = articles?.filter(article => 
     !searchQuery || 
@@ -105,12 +149,51 @@ const NewsPage = () => {
     <div className="container mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">eSports News</h1>
-        <Link to="/news/add">
-          <Button className="bg-esports-blue hover:bg-esports-blue/90">
-            <Plus className="h-4 w-4 mr-2" /> Add News Article
+        
+        {isAuthorized ? (
+          <div className="flex items-center gap-2">
+            <Link to="/news/add">
+              <Button className="bg-esports-blue hover:bg-esports-blue/90">
+                <Plus className="h-4 w-4 mr-2" /> Add News Article
+              </Button>
+            </Link>
+            <Button variant="outline" onClick={handleLogout}>
+              Logout
+            </Button>
+          </div>
+        ) : (
+          <Button 
+            onClick={() => setShowAccessForm(true)} 
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <Lock className="h-4 w-4" /> Editor Access
           </Button>
-        </Link>
+        )}
       </div>
+
+      {showAccessForm && !isAuthorized && (
+        <div className="mb-6 p-4 border rounded-md bg-muted/30">
+          <h3 className="text-lg font-medium mb-3">Enter Editor Access Code</h3>
+          <form onSubmit={handleAccessSubmit} className="flex gap-2">
+            <Input
+              type="password"
+              value={accessCode}
+              onChange={(e) => setAccessCode(e.target.value)}
+              placeholder="Enter access code"
+              className="max-w-xs"
+            />
+            <Button type="submit">Submit</Button>
+            <Button 
+              type="button" 
+              variant="ghost" 
+              onClick={() => setShowAccessForm(false)}
+            >
+              Cancel
+            </Button>
+          </form>
+        </div>
+      )}
       
       {/* Search Section */}
       <div className="glass-card p-6 mb-8">
@@ -169,21 +252,23 @@ const NewsPage = () => {
                 <div className="p-4 md:w-3/4">
                   <div className="flex justify-between items-center mb-2">
                     <span className="category-pill">{article.category}</span>
-                    <div className="flex gap-2">
-                      <Link to={`/news/edit/${article.id}`}>
-                        <Button variant="ghost" size="sm">
-                          <Edit className="h-4 w-4" />
+                    {isAuthorized && (
+                      <div className="flex gap-2">
+                        <Link to={`/news/edit/${article.id}`}>
+                          <Button variant="ghost" size="sm">
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </Link>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDelete(article.id!)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-100"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
-                      </Link>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleDelete(article.id!)}
-                        className="text-red-500 hover:text-red-700 hover:bg-red-100"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+                      </div>
+                    )}
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <h3 className="text-lg font-bold mb-2 text-white">{article.title}</h3>

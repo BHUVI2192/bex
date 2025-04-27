@@ -1,11 +1,34 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Menu, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isAuthorized, setIsAuthorized] = useState(false);
+
+  // Check if there's a saved access token in localStorage
+  useEffect(() => {
+    const checkAuthorization = () => {
+      const savedAccessCode = localStorage.getItem("news_access_code");
+      setIsAuthorized(!!savedAccessCode);
+    };
+    
+    // Check on mount
+    checkAuthorization();
+    
+    // Set up an event listener for storage changes
+    window.addEventListener("storage", checkAuthorization);
+    
+    // Listen for custom events that might be dispatched when authorization state changes
+    window.addEventListener("authStateChanged", checkAuthorization);
+    
+    return () => {
+      window.removeEventListener("storage", checkAuthorization);
+      window.removeEventListener("authStateChanged", checkAuthorization);
+    };
+  }, []);
 
   return (
     <nav className="sticky top-0 z-50 bg-esports-darker/90 backdrop-blur-md border-b border-esports-blue/20">
@@ -26,9 +49,11 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/" className="text-white hover:text-esports-blue transition-colors">Home</Link>
             <Link to="/news" className="text-white hover:text-esports-blue transition-colors">News</Link>
-            <Link to="/news/add" className="text-white hover:text-esports-blue transition-colors flex items-center">
-              <Plus className="h-4 w-4 mr-1" /> Add News
-            </Link>
+            {isAuthorized && (
+              <Link to="/news/add" className="text-white hover:text-esports-blue transition-colors flex items-center">
+                <Plus className="h-4 w-4 mr-1" /> Add News
+              </Link>
+            )}
             <Link to="/accessories" className="text-white hover:text-esports-blue transition-colors">Accessories</Link>
             <Link to="/contact" className="text-white hover:text-esports-blue transition-colors">Contact</Link>
           </div>
@@ -50,7 +75,9 @@ const Navbar = () => {
             <div className="container mx-auto py-4 px-4 flex flex-col gap-4">
               <Link to="/" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Home</Link>
               <Link to="/news" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>News</Link>
-              <Link to="/news/add" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Add News</Link>
+              {isAuthorized && (
+                <Link to="/news/add" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Add News</Link>
+              )}
               <Link to="/accessories" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Accessories</Link>
               <Link to="/contact" className="text-white hover:text-esports-blue transition-colors py-2" onClick={() => setIsMenuOpen(false)}>Contact</Link>
             </div>
